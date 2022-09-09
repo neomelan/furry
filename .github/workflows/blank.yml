@@ -1,0 +1,36 @@
+name: Green
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '*/10 * * * *'
+
+jobs:
+  build:
+    name: Green
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      fail-fast: false
+      matrix:
+        go: [1, 2]
+        flag: [A, B]
+    env:
+        NUM_JOBS: 20
+        JOB: ${{ matrix.go }}
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@master
+          
+      - name: Green
+        run: |
+          git config --local user.email "113073230+neomelan@users.noreply.github.com"
+          git config --local user.name "neomelan"
+          git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git pull --rebase origin main
+          git commit --allow-empty -m "ci(commitlint,workflow)"
+          git push -f origin main
